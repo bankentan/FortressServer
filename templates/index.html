@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+
+{% block extend_css %}
+            #animated-fadeIn{
+            margin-top: -50px !important;
+        }
+{% endblock %}
+
+{% block content %}
+    <div id="animated-fadeIn" class="animated fadeIn">
+                <!-- Widgets  -->
+                <!-- /Widgets -->
+                <!--  Traffic  -->
+                <div class="card">
+
+                </div>
+                <!--  /Traffic -->
+                <div class="clearfix"></div>
+                <!-- Orders -->
+                <div class="orders">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="card-body">
+                                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal">添加设备</button>
+                                        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#seacheModal">搜索设备</button>
+
+                                </div>
+                                <div class="card-body--">
+                                    <div class="table-stats order-table ov-h">
+                                        <table class="table" id="hostlist_table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="avatar">主机名</th>
+                                                    <th>ip地址</th>
+                                                    <th>运营商</th>
+                                                    <th>角色</th>
+                                                    <th>状态</th>
+                                                    <th>备注</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for host_obj in host_list %}
+                                                <tr>
+                                                    <td>{{ host_obj.hostname | lower }}</td>
+                                                    <td>{{ host_obj.ipaddr }}</td>
+                                                    <td>{{ host_obj.isp.name | lower }}</td>
+                                                    <td>{{ host_obj.role.name | lower }}</td>
+                                                    {% if host_obj.status == 1 %}
+                                                    <td><span class="badge badge-danger">{{ host_obj.get_status_display}}</span></td>
+                                                    {% else %}
+                                                    <td><span class="badge badge-success">{{ host_obj.get_status_display}}</span></td>
+                                                    {% endif %}
+                                                    <td>
+                                                        {{ host_obj.remarks }}
+                                                    </td>
+                                                    <td><button id="change_host_info_btn" change_id="{{ host_obj.id }}" type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#changeModal">修改</button>|<button delete_id="{{ host_obj.id }}" type="button" class="btn btn-danger btn-sm">删除</button></td>
+                                                </tr>
+                                            {% endfor %}
+
+                                            </tbody>
+                                        </table>
+                                        <div class="col-sm-12 col-md-7">
+
+                                            <div class="dataTables_paginate paging_simple_numbers" id="bootstrap-data-table_paginate">
+                                                {{ code_str|safe }}
+                                            </div>
+                                        </div>
+                                    </div> <!-- /.table-stats -->
+                                </div>
+                            </div> <!-- /.card -->
+                        </div>  <!-- /.col-lg-8 -->
+
+
+                    </div>
+                </div>
+                <!-- /.orders -->
+                <!-- To Do and Live Chat -->
+
+                <!-- /To Do and Live Chat -->
+
+                <!-- /Calender Chart Weather -->
+                <!-- Modal - Calendar - Add New Event -->
+                <div class="modal fade none-border" id="event-modal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title"><strong>Add New Event</strong></h4>
+                            </div>
+                            <div class="modal-body"></div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-success save-event waves-effect waves-light">Create event</button>
+                                <button type="button" class="btn btn-danger delete-event waves-effect waves-light" data-dismiss="modal">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /#event-modal -->
+                <!-- Modal - Calendar - Add Category -->
+                <div class="modal fade none-border" id="add-category">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title"><strong>Add a category </strong></h4>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="control-label">Category Name</label>
+                                            <input class="form-control form-white" placeholder="Enter name" type="text" name="category-name"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="control-label">Choose Category Color</label>
+                                            <select class="form-control form-white" data-placeholder="Choose a color..." name="category-color">
+                                                <option value="success">Success</option>
+                                                <option value="danger">Danger</option>
+                                                <option value="info">Info</option>
+                                                <option value="pink">Pink</option>
+                                                <option value="primary">Primary</option>
+                                                <option value="warning">Warning</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-danger waves-effect waves-light save-category" data-dismiss="modal">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- /#add-category -->
+            </div>
+            <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="largeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="largeModalLabel">添加设备</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form id="add-form" class="forms-sample" action="/add_host/" method="post" novalidate="novalidate">
+                                    {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">主机名</label>
+                                            <input name="hostname" type="text" class="form-control" id="exampleInputName1"
+                                                   placeholder="主机名">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">ip地址</label>
+                                            <input name="ipaddr" type="text" class="form-control" id="exampleInputName1"
+                                                   placeholder="ip地址">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">角色</label>
+                                            <select name="role" data-placeholder="角色名" class="standardSelect" tabindex="-1" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for role in role_list %}
+                                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">运营商</label>
+                                            <select name="isp" data-placeholder="运营商" class="standardSelect" tabindex="-1" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for isp in isp_list %}
+                                                    <option value="{{ isp.id }}">{{ isp.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">设备组</label>
+                                            <select name="group" data-placeholder="设备组" multiple class="standardSelect" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for group in group_list %}
+                                                    <option value="{{ group.id }}">{{ group.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">设备状态</label>
+                                            <div class="col col-md-9">
+                                                <div class="form-check-inline form-check">
+
+                                                        <input name="status" type="radio" id="inline-radio1" checked="checked" value="1" class="form-check-input">开启
+
+
+                                                        <input name="status" type="radio" id="inline-radio2"  value="0" class="form-check-input">禁用
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleTextarea1">备注</label>
+                                            <textarea name="remakes" class="form-control" id="exampleTextarea1" rows="2"></textarea>
+                                        </div>
+                                        <button type="button" id="add-host-form-submit" class="btn btn-success mr-2">Submit</button>
+                                        <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="largeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="largeModalLabel">搜索条件</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form id="search-form" class="forms-sample" action="/index/" method="get" novalidate="novalidate">
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">主机名</label>
+                                            <input name="hostname" type="text" class="form-control" id="exampleInputName1"
+                                                   placeholder="主机名">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">ip地址</label>
+                                            <input name="ipaddr" type="text" class="form-control" id="exampleInputName1"
+                                                   placeholder="ip地址">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">角色</label>
+                                            <select name="role" data-placeholder="角色名" class="standardSelect" tabindex="-1" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for role in role_list %}
+                                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">运营商</label>
+                                            <select name="isp" data-placeholder="运营商" class="standardSelect" tabindex="-1" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for isp in isp_list %}
+                                                    <option value="{{ isp.id }}">{{ isp.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">设备状态</label>
+                                            <select name="status" data-placeholder="设备状态" class="standardSelect" tabindex="-1" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                    <option value=0>开启</option>
+                                                    <option value=1>禁用</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">设备组</label>
+                                            <select name="group" data-placeholder="设备组" multiple class="standardSelect" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for group in group_list %}
+                                                    <option value="{{ group.id }}">{{ group.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+
+                                        <button type="submit" id="search-host-form-submit" class="btn btn-success mr-2">Search</button>
+                                        <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="changeModal" tabindex="-1" role="dialog" aria-labelledby="largeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="largeModalLabel">修改设备信息</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form id="change-form" class="forms-sample" action="/change_host/" method="post" novalidate="novalidate">
+                                    {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">主机名</label>
+                                            <input name="hostname" type="text" class="form-control" id="exampleInputName1"
+                                                   placeholder="主机名">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">ip地址</label>
+                                            <input name="ipaddr" type="text" class="form-control" id="exampleInputName1"
+                                                   placeholder="ip地址">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">角色</label>
+                                            <select name="role" data-placeholder="角色名" class="standardSelect" tabindex="-1" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for role in role_list %}
+                                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">运营商</label>
+                                            <select name="isp" data-placeholder="运营商" class="standardSelect" tabindex="-1" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for isp in isp_list %}
+                                                    <option value="{{ isp.id }}">{{ isp.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">设备组</label>
+                                            <select name="group" data-placeholder="设备组" multiple class="standardSelect" style="display: none;">
+                                                <option value="" label="default"></option>
+                                                {% for group in group_list %}
+                                                    <option value="{{ group.id }}">{{ group.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">设备状态</label>
+                                            <div class="col col-md-9">
+                                                <div class="form-check-inline form-check">
+
+                                                        <input name="status" type="radio" id="inline-radio1" checked="checked" value="0" class="form-check-input">开启
+
+
+                                                        <input name="status" type="radio" id="inline-radio2"  value="1" class="form-check-input">禁用
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleTextarea1">备注</label>
+                                            <textarea name="remakes" class="form-control" id="exampleTextarea1" rows="2"></textarea>
+                                        </div>
+                                        <button type="button" id="change-host-form-submit" class="btn btn-success mr-2">Submit</button>
+                                        <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+{% endblock  %}
+
+{% block extent_js %}
+    <script src="/static/assets/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/assets/js/lib/chosen/chosen.jquery.min.js"></script>
+<script>
+    jQuery(document).ready(function() {
+        jQuery(".standardSelect").chosen({
+            disable_search_threshold: 10,
+            no_results_text: "Oops, nothing found!",
+            width: "100%"
+        });
+    });
+
+    $('#add-host-form-submit').click(function () {
+        var del_err_ele = $('#add-form').find('[mssg=err]');
+        del_err_ele.remove();
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: '/add_host/',
+            data: $('#add-form').serialize(),
+            success: function (arg) {
+                if(arg.status){
+                    window.location.href = '/index/'
+                }else{
+                    $.each(arg, function (fname, msg) {
+                    console.log(fname, msg);
+                    var form_ele = $('#add-form').find('[name='+fname+']');
+                    var err_msg = "<span mssg='err' style='color:red;'>"+msg[0].message+"</span>";
+                    form_ele.after(err_msg)
+                    })
+
+                }
+
+            }
+        })
+    });
+
+    $('#hostlist_table').on('click', '#change_host_info_btn', function (event) {
+        var hid = $(this).attr('change_id');
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: '/get_host/',
+            data: {'host_id': hid},
+            success: function (arg) {
+                $('#change-form').find('[name=hostname]').val(arg[0].fields.hostname);
+                $('#change-form').find('[name=ipaddr]').val(arg[0].fields.ipaddr);
+                $('#change-form select[name=role]').val(arg[0].fields.role).trigger("chosen:updated");
+                $('#change-form select[name=isp]').val(arg[0].fields.isp).trigger("chosen:updated");
+                console.log(arg[0].fields.group);
+                $('#change-form select[name=group]').val(arg[0].fields.group).trigger("chosen:updated");
+                var id_msg = "<input name=id value="+arg[0].pk+" style='display: none;'>";
+                $('#change-form').append(id_msg)
+            }
+        })
+    });
+
+
+    $('#change-host-form-submit').click(function () {
+        var del_err_ele = $('#change-form').find('[mssg=err]');
+        del_err_ele.remove();
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: '/change_host/',
+            data: $('#change-form').serialize(),
+            success: function (arg) {
+                if(arg.status){
+                    window.location.href = '/index/'
+                }else{
+                    $.each(arg, function (fname, msg) {
+                    var form_ele = $('#change-form').find('[name='+fname+']');
+                    var err_msg = "<span mssg='err' style='color:red;'>"+msg[0].message+"</span>";
+                    form_ele.after(err_msg)
+                    })
+
+                }
+
+            }
+        })
+    });
+
+</script>
+{% endblock %}
