@@ -23,7 +23,7 @@
                             <div class="card">
                                 <div class="card-body">
                                         <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal">添加设备</button>
-                                        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#seacheModal">搜索设备</button>
+                                        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#searchModal">搜索设备</button>
 
                                 </div>
                                 <div class="card-body--">
@@ -55,7 +55,7 @@
                                                     <td>
                                                         {{ host_obj.remarks }}
                                                     </td>
-                                                    <td><button id="change_host_info_btn" change_id="{{ host_obj.id }}" type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#changeModal">修改</button>|<button delete_id="{{ host_obj.id }}" type="button" class="btn btn-danger btn-sm">删除</button></td>
+                                                    <td><button id="change_host_info_btn" change_id="{{ host_obj.id }}" type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#changeModal">修改</button>|<button id="del_host_info_btn" delete_id="{{ host_obj.id }}" type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delmodal">删除</button></td>
                                                 </tr>
                                             {% endfor %}
 
@@ -194,10 +194,10 @@
                                             <div class="col col-md-9">
                                                 <div class="form-check-inline form-check">
 
-                                                        <input name="status" type="radio" id="inline-radio1" checked="checked" value="1" class="form-check-input">开启
+                                                        <input name="status" type="radio" id="inline-radio1" checked="checked" value="0" class="form-check-input">开启
 
 
-                                                        <input name="status" type="radio" id="inline-radio2"  value="0" class="form-check-input">禁用
+                                                        <input name="status" type="radio" id="inline-radio2"  value="1" class="form-check-input">禁用
 
                                                 </div>
                                             </div>
@@ -365,6 +365,27 @@
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="delmodal" tabindex="-1" role="dialog" aria-labelledby="smallmodalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="smallmodalLabel">确认删除</h3>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="delete_cmform">
+                                是否确认删除设备
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button id="del-host-form-submit" type="button" class="btn btn-primary">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 {% endblock  %}
 
 {% block extent_js %}
@@ -392,7 +413,6 @@
                     window.location.href = '/index/'
                 }else{
                     $.each(arg, function (fname, msg) {
-                    console.log(fname, msg);
                     var form_ele = $('#add-form').find('[name='+fname+']');
                     var err_msg = "<span mssg='err' style='color:red;'>"+msg[0].message+"</span>";
                     form_ele.after(err_msg)
@@ -414,9 +434,14 @@
             success: function (arg) {
                 $('#change-form').find('[name=hostname]').val(arg[0].fields.hostname);
                 $('#change-form').find('[name=ipaddr]').val(arg[0].fields.ipaddr);
+                if(arg[0].fields.status == 0){
+                    $('#change-form').find('#inline-radio1').prop("checked", true);
+                }else{
+                    $('#change-form').find('#inline-radio2').prop("checked", true);
+                }
+
                 $('#change-form select[name=role]').val(arg[0].fields.role).trigger("chosen:updated");
                 $('#change-form select[name=isp]').val(arg[0].fields.isp).trigger("chosen:updated");
-                console.log(arg[0].fields.group);
                 $('#change-form select[name=group]').val(arg[0].fields.group).trigger("chosen:updated");
                 var id_msg = "<input name=id value="+arg[0].pk+" style='display: none;'>";
                 $('#change-form').append(id_msg)
@@ -449,5 +474,32 @@
         })
     });
 
+    $('#hostlist_table').on('click', '#del_host_info_btn', function () {
+        var hid = $(this).attr('delete_id');
+        $.ajax({
+            type: 'GET',
+            url: '/del_host/',
+            data: {'host_id': hid},
+            success: function (arg) {
+                $('#delete_cmform').text(arg);
+                $('#delete_cmform').attr('hid', hid)
+            }
+        })
+    });
+
+    $('#del-host-form-submit').click(function () {
+        var did = $('#delete_cmform').attr('hid');
+        console.log(did);
+        $.ajax({
+            type: 'POST',
+            url: '/del_host/',
+            data: {'host_id': did},
+            success: function (arg) {
+                if(arg == 'OK'){
+                    window.location.href = '/index/'
+                }
+            }
+        })
+    })
 </script>
 {% endblock %}

@@ -23,5 +23,6 @@ urlpatterns = [
     url('add_host/', views.add_host),
     url('get_host/', views.get_host),
     url('change_host/', views.change_host),
+    url('del_host/', views.del_host),
 
 ]

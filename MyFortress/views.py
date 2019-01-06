@@ -21,7 +21,7 @@ def index(request):
         if request.GET.get(field, None):
             search_condition[field] = request.GET.get(field)
 
-    host_list = models.HostList.objects.filter(**search_condition)
+    host_list = models.HostList.objects.filter(**search_condition).order_by('-id')
     curent_content, code_str = pagination.pagination(curent_page, host_list, page_num=7, page_content=20, **search_condition)
     return render(request, 'index.html',
                   {'host_list': curent_content, 'code_str': code_str, 'role_list': role_list, 'isp_list': isp_list,
@@ -30,6 +30,7 @@ def index(request):
 @csrf_exempt
 def add_host(request):
     if request.method == 'POST':
+        print(request.POST)
         add_host_form = add_hosts_modelform.add_form(request.POST)
         if add_host_form.is_valid():
             add_host_form.save()
@@ -60,3 +61,15 @@ def change_host(request):
         else:
             ret = change_host_form.errors.as_json()
             return HttpResponse(ret)
+
+@csrf_exempt
+def del_host(request):
+    if request.method == 'GET':
+        hid = request.GET.get('host_id')
+        hname = models.HostList.objects.get(id=hid).hostname
+        return HttpResponse(hname)
+
+    if request.method == 'POST':
+        did = request.POST.get('host_id')
+        models.HostList.objects.filter(id=did).delete()
+        return HttpResponse('OK')

@@ -42,7 +42,7 @@ def pagination(curent_page, content_list, page_num=5, page_content=10, **kwargs)
     if curent_page == p:
         code_list.append('<li class="paginate_button page-item next disabled" id="bootstrap-data-table_next"><a aria-controls="bootstrap-data-table" data-dt-idx="7" tabindex="0" class="page-link">Next</a> </li>')
     else:
-        code_list.append('<li class="paginate_button page-item next" id="bootstrap-data-table_next"><a href="/index/?page=%s&%s" aria-controls="bootstrap-data-table" data-dt-idx="7" tabindex="0" class="page-link">Next</a> </li>' % (prev_page, search_param))
+        code_list.append('<li class="paginate_button page-item next" id="bootstrap-data-table_next"><a href="/index/?page=%s&%s" aria-controls="bootstrap-data-table" data-dt-idx="7" tabindex="0" class="page-link">Next</a> </li>' % (next_page, search_param))
     code_list.append('</ul>')
     code_str = ''.join(code_list)
     #return render(request, 'page.html', {'content_list': curent_content, 'code_str': code_str})
